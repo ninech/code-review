@@ -1,0 +1,6 @@
+apiVersion: security.nine.ch/v1alpha1
+kind: OAuthProxy
+metadata:
+  name: oauthproxy-sample
+spec:
+  # TODO(user): Add fields here

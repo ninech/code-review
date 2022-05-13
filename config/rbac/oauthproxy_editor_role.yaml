@@ -1,0 +1,24 @@
+# permissions for end users to edit oauthproxies.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: oauthproxy-editor-role
+rules:
+- apiGroups:
+  - security.nine.ch
+  resources:
+  - oauthproxies
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - security.nine.ch
+  resources:
+  - oauthproxies/status
+  verbs:
+  - get

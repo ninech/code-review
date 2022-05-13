@@ -1,0 +1,16 @@
+domain: nine.ch
+layout:
+- go.kubebuilder.io/v3
+projectName: sso
+repo: nine.ch/sso
+resources:
+- api:
+    crdVersion: v1
+    namespaced: true
+  controller: true
+  domain: nine.ch
+  group: security
+  kind: OAuthProxy
+  path: nine.ch/sso/api/v1alpha1
+  version: v1alpha1
+version: "3"

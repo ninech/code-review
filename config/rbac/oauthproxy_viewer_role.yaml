@@ -1,0 +1,20 @@
+# permissions for end users to view oauthproxies.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: oauthproxy-viewer-role
+rules:
+- apiGroups:
+  - security.nine.ch
+  resources:
+  - oauthproxies
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - security.nine.ch
+  resources:
+  - oauthproxies/status
+  verbs:
+  - get
