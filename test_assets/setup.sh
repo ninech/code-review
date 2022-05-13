@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# ensure we are in the same dir as the running script
+cd `dirname $0`
+
 # newer versions than this time out when stopping...
 # But thankfully we don't have a dependency on newer features.
 export K8S_VERSION="1.19.2"
