@@ -4,13 +4,14 @@ import (
 	"testing"
 
 	corev1 "k8s.io/api/core/v1"
+	networkingv1 "k8s.io/api/networking/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	securityv1alpha1 "nine.ch/sso/api/v1alpha1"
 	"nine.ch/sso/controllers"
 )
 
 func TestOAuthProxyDeployment(t *testing.T) {
-	p := newOAuthProxy()
+	p := newOAuthProxy(false)
 	cfg := &controllers.OidcConfig{
 		ClientSecret: "secret",
 		ClientID:     "a-b-c-d",
@@ -31,7 +32,7 @@ func TestOAuthProxyDeployment(t *testing.T) {
 }
 
 func TestOAuthProxyIngress(t *testing.T) {
-	p := newOAuthProxy()
+	p := newOAuthProxy(false)
 	ingress := controllers.OAuthProxyIngress(p)
 	if ingress.Annotations["kubernetes.io/tls-acme"] != "true" {
 		t.Fatalf("incorrect TLS annotation")
@@ -50,8 +51,8 @@ func TestOAuthProxyIngress(t *testing.T) {
 	}
 }
 
-func newOAuthProxy() securityv1alpha1.OAuthProxy {
-	return securityv1alpha1.OAuthProxy{
+func newOAuthProxy(withIngress bool) securityv1alpha1.OAuthProxy {
+	proxy := securityv1alpha1.OAuthProxy{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "test",
 			Namespace: "default",
@@ -64,4 +65,40 @@ func newOAuthProxy() securityv1alpha1.OAuthProxy {
 			RedirectURL: "https://my-cool-domain.com/authorization",
 		},
 	}
+	if !withIngress {
+		return proxy
+	}
+
+	pathType := networkingv1.PathTypeImplementationSpecific
+	ruleValue := networkingv1.IngressRuleValue{
+		HTTP: &networkingv1.HTTPIngressRuleValue{
+			Paths: []networkingv1.HTTPIngressPath{{
+				Path:     "/",
+				PathType: &pathType,
+				Backend: networkingv1.IngressBackend{
+					Service: &networkingv1.IngressServiceBackend{
+						Name: "whatever-service",
+						Port: networkingv1.ServiceBackendPort{
+							Name: "http",
+						},
+					},
+				},
+			}},
+		},
+	}
+	proxy.Spec.Ingress = &networkingv1.IngressSpec{
+		IngressClassName: nil, // we expect a default ingress class to exist.
+		TLS: []networkingv1.IngressTLS{{
+			Hosts:      []string{"my-super-host.com", "my-other-host.com"},
+			SecretName: "certificate-tls",
+		}},
+		Rules: []networkingv1.IngressRule{{
+			Host:             "my-super-host.com",
+			IngressRuleValue: ruleValue,
+		}, {
+			Host:             "my-other-host.com",
+			IngressRuleValue: ruleValue,
+		}},
+	}
+	return proxy
 }

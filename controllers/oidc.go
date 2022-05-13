@@ -1,7 +1,7 @@
 package controllers
 
 type KeycloakClient struct {
-	// TODO: implement
+	// TODO: implement.
 }
 
 func (k *KeycloakClient) GetOIDCConfig(clientName string, redirectURL string) (*OidcConfig, error) {

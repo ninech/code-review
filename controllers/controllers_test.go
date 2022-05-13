@@ -41,43 +41,46 @@ import (
 func TestOAuthProxyController(t *testing.T) {
 	ctx := context.Background()
 	client := setup(ctx, t)
-	p := newOAuthProxy()
-	if err := client.Create(ctx, &p); err != nil {
-		t.Fatalf("could not create oauthProxy: %v", err)
-	}
-
-	if err := eventually(func() error {
-		if err := client.Get(ctx, types.NamespacedName{Name: p.Name, Namespace: p.Namespace}, &p); err != nil {
-			return err
-		}
-		if !p.Status.Ready {
-			return fmt.Errorf("proxy is not ready")
-		}
-		return nil
-	}, time.Minute, time.Second*2); err != nil {
-		t.Fatalf("proxy did not get ready: %v", err)
-	}
-
-	if err := client.Delete(ctx, &p); err != nil {
-		t.Fatalf("could not delete proxy: %v", err)
-	}
-
-	if err := eventually(func() error {
-		nn := types.NamespacedName{p.Name, p.Namespace}
-		if err := client.Get(ctx, nn, &appsv1.Deployment{}); err == nil || !apierrors.IsNotFound(err) {
-			return fmt.Errorf("deployment still exists or other error %v", err)
+	simple := newOAuthProxy(false)
+	withIngress := newOAuthProxy(true)
+	for _, p := range []securityv1alpha1.OAuthProxy{simple, withIngress} {
+		if err := client.Create(ctx, &p); err != nil {
+			t.Fatalf("could not create oauthProxy: %v", err)
 		}
 
-		if err := client.Get(ctx, nn, &networkingv1.Ingress{}); err == nil || !apierrors.IsNotFound(err) {
-			return fmt.Errorf("ingress still exists or other error %v", err)
+		if err := eventually(func() error {
+			if err := client.Get(ctx, types.NamespacedName{Name: p.Name, Namespace: p.Namespace}, &p); err != nil {
+				return err
+			}
+			if !p.Status.Ready {
+				return fmt.Errorf("proxy is not ready")
+			}
+			return nil
+		}, time.Minute, time.Second*2); err != nil {
+			t.Fatalf("proxy did not get ready: %v", err)
 		}
 
-		if err := client.Get(ctx, nn, &corev1.Service{}); err == nil || !apierrors.IsNotFound(err) {
-			return fmt.Errorf("ingress still exists or other error %v", err)
+		if err := client.Delete(ctx, &p); err != nil {
+			t.Fatalf("could not delete proxy: %v", err)
 		}
-		return nil
-	}, time.Minute, time.Second*2); err != nil {
-		t.Fatalf("error waiting for all objects to be deleted: %v", err)
+
+		if err := eventually(func() error {
+			nn := types.NamespacedName{p.Name, p.Namespace}
+			if err := client.Get(ctx, nn, &appsv1.Deployment{}); err == nil || !apierrors.IsNotFound(err) {
+				return fmt.Errorf("deployment still exists or other error %v", err)
+			}
+
+			if err := client.Get(ctx, nn, &networkingv1.Ingress{}); err == nil || !apierrors.IsNotFound(err) {
+				return fmt.Errorf("ingress still exists or other error %v", err)
+			}
+
+			if err := client.Get(ctx, nn, &corev1.Service{}); err == nil || !apierrors.IsNotFound(err) {
+				return fmt.Errorf("ingress still exists or other error %v", err)
+			}
+			return nil
+		}, time.Minute, time.Second*2); err != nil {
+			t.Fatalf("error waiting for all objects to be deleted: %v", err)
+		}
 	}
 }
 
