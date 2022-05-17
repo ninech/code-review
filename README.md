@@ -16,10 +16,18 @@ other versions to work as well.
 
 ## Reviewing the Code
 
+Your task is to review not only the PR in this repo, but the code in general.
+Try to understand the current system and the extension that is proposed in this PR.
 We recommend checking the code out locally in order to get a full picture of the
-code under review. Please note that this exercise is not just about the code
-changes, but also about the already existing code. Try to understand the current
-system and the extension that is proposed in this PR.
+code under review.
+
+You will then present your code review and explain your findings and suggestions
+during your interview with the Platform Team at Nine. You will also be expected to
+do some live coding (see [Next Steps](#next-steps) below).
+
+Please do not add comments to the PR in this repo, either privately fork it and
+make comments there, which you can show during your interview, or make notes
+somewhere else convenient.
 
 Another recommendation: be nit-picky! We won't judge you for having opinions
 about how code should look like, and are interested in seeing what you consider
@@ -41,7 +49,7 @@ make an implementation work? Are there limitations to the current stub?
 ## Next Steps
 
 Once we've talked through your review of the code, we will ask you to do some
-live coding. You may prepare some thoughts on what you think would be sensible
+live coding. You should prepare some thoughts on what you think would be sensible
 to fix, clean up or add. This will be similar to a pair programming exercise,
 and we expect this to be interactive with the interviewers.
 
