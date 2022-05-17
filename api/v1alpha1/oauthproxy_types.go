@@ -18,6 +18,7 @@ package v1alpha1
 
 import (
 	corev1 "k8s.io/api/core/v1"
+	networkingv1 "k8s.io/api/networking/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -32,6 +33,9 @@ type OAuthProxySpec struct {
 	Host string `json:"host,omitempty"`
 	// RedirectURL for the OIDC flow.
 	RedirectURL string `json:"redirectURL"`
+	// Ingress allows specifying the ingress. Overwrites host.
+	// +optional
+	Ingress *networkingv1.IngressSpec `json:"ingress,omitempty"`
 }
 
 // OAuthProxyStatus defines the observed state of OAuthProxy

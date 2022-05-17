@@ -293,6 +293,33 @@ func compareIngress(a, b *networkingv1.Ingress) bool {
 }
 
 func OAuthProxyIngress(cr securityv1alpha1.OAuthProxy) *networkingv1.Ingress {
+	if cr.Spec.Ingress != nil {
+		ing := &networkingv1.Ingress{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      cr.Name,
+				Namespace: cr.Namespace,
+				Annotations: map[string]string{
+					// we want TLS certificates for this ingress.
+					"kubernetes.io/tls-acme": "true",
+				},
+			},
+			Spec: *cr.Spec.Ingress,
+		}
+		for _, rule := range ing.Spec.Rules {
+			for _, path := range rule.HTTP.Paths {
+				path.Backend = networkingv1.IngressBackend{
+					Service: &networkingv1.IngressServiceBackend{
+						Name: cr.Name,
+						Port: networkingv1.ServiceBackendPort{
+							Name: "http",
+						},
+					},
+				}
+			}
+		}
+		return ing
+	}
+
 	pathType := networkingv1.PathTypeImplementationSpecific
 	return &networkingv1.Ingress{
 		ObjectMeta: metav1.ObjectMeta{
